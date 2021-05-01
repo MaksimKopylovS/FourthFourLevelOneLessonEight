@@ -1,0 +1,71 @@
+В своём приложении для системных сообщенй всем пользователям я использовал 
+отдельный метод внутри которого был цикл для отправки сообщения и список пользователей которым нужно отправить сообщение.
+
+В данном случая целе сообразвно применить поведенческий патерн Медиатор
+Который решает множество проблем, можно добовлять пользователей для рассылки и удалять, менят системное сообщение 
+
+
+interface ChatMediator {
+    public void sendMessage(String msg, User user);
+    void addUser(User user);
+}
+
+abstract class User {
+    private ChatMediator mediator;
+    private String name;
+
+    public User(ChatMediator med, String name) {
+        this.mediator = med;
+        this.name = name;
+    }
+    public String getName(){
+        return name;
+    }
+
+    public abstract void send(String msg);
+
+    public abstract void receive(String msg);
+}
+
+class UserImpl extends User {
+    private ChatMediator mediator;
+
+    public UserImpl(ChatMediator med, String name) {
+        super(med, name);
+    }
+
+    @Override
+    public void send(String msg) {
+        System.out.println(getName() + " Отправка собщения  " + msg);
+        mediator.sendMessage(msg, this);
+    }
+
+    @Override
+    public void receive(String msg) {
+        System.out.println(getName() + " Получение сообщения " + msg);
+    }
+}
+
+
+class ChatMediatorImpl implements ChatMediator {
+
+    private List<User> users;
+
+    public ChatMediatorImpl() {
+        this.users = new ArrayList<>();
+    }
+
+    @Override
+    public void sendMessage(String msg, User user) {
+        for (User u : this.users) {
+            if (u != user) {
+                u.receive(msg);
+            }
+        }
+    }
+
+    @Override
+    public void addUser(User user) {
+        this.users.add(user);
+    }
+}
